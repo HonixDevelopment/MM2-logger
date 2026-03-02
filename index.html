@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Murder Mystery Live Logger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>MURDER MYSTERY LOGGER</h1>
+        <div class="header-btns">
+            <button class="btn" onclick="exportData('json')">Export JSON</button>
+            <button class="btn" onclick="exportData('csv')">Export CSV</button>
+            <button class="btn" style="background:var(--c-red);color:white;" onclick="clearAll()">Clear All</button>
+        </div>
+    </header>
+
+    <div class="app-grid">
+        
+        <!-- SECTION A: LEADERBOARD -->
+        <div class="window order-mobile-2">
+            <div class="window-header header-yellow">
+                <span>LIVE LEADERBOARD</span>
+                <div class="window-controls"><span></span><span></span><span></span></div>
+            </div>
+            <div class="window-content">
+                <table class="lb-table">
+                    <thead>
+                        <tr><th>Player</th><th>Points</th></tr>
+                    </thead>
+                    <tbody id="lb-body">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION B: LOGGER -->
+        <div class="window order-mobile-1" style="grid-row: span 2;">
+            <div class="window-header header-blue">
+                <span>QUICK ROUND LOGGER</span>
+                <div class="window-controls"><span></span><span></span><span></span></div>
+            </div>
+            <div class="window-content">
+                
+                <h3 class="c-yellow" style="margin-bottom:10px;">1. Assign Roles</h3>
+                <div id="roles-container">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div id="outcome-container" style="display:none;">
+                    <h3 class="c-yellow" style="margin-top:20px;">2. Outcome</h3>
+                    
+                    <div class="q-title">Was the murderer killed?</div>
+                    <div class="radio-group">
+                        <input type="radio" name="mkilled" id="mk-yes" value="yes" class="radio-yes" onchange="updateUI()">
+                        <label for="mk-yes" class="radio-label">YES</label>
+                        <input type="radio" name="mkilled" id="mk-no" value="no" class="radio-no" onchange="updateUI()">
+                        <label for="mk-no" class="radio-label">NO</label>
+                    </div>
+
+                    <!-- PATH: YES (Murderer Killed) -->
+                    <div id="path-yes" class="q-block">
+                        <div class="q-title">Who killed the murderer?</div>
+                        <div class="radio-group">
+                            <input type="radio" name="whoKilled" id="wk-sheriff" value="sheriff" onchange="updateUI()">
+                            <label for="wk-sheriff" class="radio-label">Sheriff</label>
+                            <input type="radio" name="whoKilled" id="wk-hero" value="hero" onchange="updateUI()">
+                            <label for="wk-hero" class="radio-label">Hero Innocent</label>
+                        </div>
+
+                        <!-- Sheriff Killed -->
+                        <div id="sub-sheriff" style="display:none; margin-top:15px;">
+                            <div class="q-title">Innocents alive?</div>
+                            <div class="radio-group">
+                                <input type="radio" name="s_alive" id="sa-0" value="0" onchange="updateUI()"><label for="sa-0" class="radio-label">0</label>
+                                <input type="radio" name="s_alive" id="sa-1" value="1" onchange="updateUI()"><label for="sa-1" class="radio-label">1</label>
+                                <input type="radio" name="s_alive" id="sa-2" value="2" onchange="updateUI()"><label for="sa-2" class="radio-label">2</label>
+                            </div>
+                            <div id="s-who-survived" style="display:none; margin-top:10px;">
+                                <div class="q-title">Who survived?</div>
+                                <select id="s_survived_select" onchange="updateUI()"></select>
+                            </div>
+                        </div>
+
+                        <!-- Hero Killed -->
+                        <div id="sub-hero" style="display:none; margin-top:15px;">
+                            <div class="q-title">Select Hero Player:</div>
+                            <select id="h_hero_select" style="margin-bottom:15px;" onchange="updateUI()"></select>
+                            
+                            <div class="q-title">Innocents alive? (Including Hero)</div>
+                            <div class="radio-group">
+                                <input type="radio" name="h_alive" id="ha-1" value="1" onchange="updateUI()"><label for="ha-1" class="radio-label">1</label>
+                                <input type="radio" name="h_alive" id="ha-2" value="2" onchange="updateUI()"><label for="ha-2" class="radio-label">2</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PATH: NO (Murderer Survived) -->
+                    <div id="path-no" class="q-block">
+                        <div class="q-title">Innocents killed?</div>
+                        <div class="radio-group">
+                            <input type="radio" name="i_killed" id="ik-0" value="0" onchange="updateUI()"><label for="ik-0" class="radio-label">0</label>
+                            <input type="radio" name="i_killed" id="ik-1" value="1" onchange="updateUI()"><label for="ik-1" class="radio-label">1</label>
+                            <input type="radio" name="i_killed" id="ik-2" value="2" onchange="updateUI()"><label for="ik-2" class="radio-label">2</label>
+                        </div>
+                        <div id="i-who-died" style="display:none; margin-top:10px;">
+                            <div class="q-title">Who died?</div>
+                            <select id="i_died_select" onchange="updateUI()"></select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="preview-box" class="preview-box">
+                    Select roles to begin...
+                </div>
+
+                <button id="btn-submit" class="btn btn-green" disabled onclick="submitRound()">[ ADD ROUND ]</button>
+
+            </div>
+        </div>
+
+        <!-- SECTION C: HISTORY -->
+        <div class="window order-mobile-3">
+            <div class="window-header header-red">
+                <span>ROUND HISTORY</span>
+                <div class="window-controls"><span></span><span></span><span></span></div>
+            </div>
+            <div class="window-content" id="history-container" style="max-height: 400px; overflow-y: auto;">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
