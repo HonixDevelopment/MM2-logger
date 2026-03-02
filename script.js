@@ -146,7 +146,7 @@
                     I.forEach(p => scores[p] = 0);
                 }
 
-                scores[M[0]] = 1 + killed;
+                scores[M[0]] = 2 + killed;
                 scores[S[0]] = 1 + alive;
                 currentSummary = "Murderer Win";
                 canSubmit = true;
@@ -283,4 +283,5 @@
         }
 
         // Start App
+
         init();
